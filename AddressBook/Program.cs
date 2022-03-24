@@ -15,12 +15,7 @@ namespace AddressBook
             cbook.AppInterface();
 
 
-            cbook.ShowContacts();
-
-
-
-           
-
+         
             Console.ReadKey();
         }
     }
