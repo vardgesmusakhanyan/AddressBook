@@ -3,241 +3,181 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AddressBook.Services;
+using AddressBook.Interfaces;
 
 namespace AddressBook
 {
-    class ContactBook
+    public class ContactBook
     {
-        private List<Contact> Contacts = new List<Contact>();
+
+        private readonly IDbService _dbService;
 
 
-        public List<Contact> GetContacts()
+        public ContactBook(IDbService dbService)
         {
-            if (Contacts.Count == 0)
-            {
-                Console.WriteLine("Your contacts list is empty");
-                Console.ReadKey();
-            }
-            return Contacts;
+            _dbService = dbService;
         }
 
-        public void AppInterface()
+        public void Run()
         {
             Console.WriteLine("Type help to see the available commands, or type quit to exit the program");
-            string str = "  ";
+            string cmd;
 
-            while (str.ToLower() != "quit")
+            while (true)
             {
-                str = Console.ReadLine();
+                cmd = Console.ReadLine();
 
-                if (str.ToLower() == "help")
+                switch (cmd.ToLower())
                 {
-                    Console.WriteLine("The available commands are:");
-                    Console.WriteLine("Showcontacts to see all your contacts");
-                    Console.WriteLine("CreateContact to create a new contact");
-                    Console.WriteLine("EditContact to edit an existing contact");
-                    Console.WriteLine("DeleteContact to delete an existing contact");
-                    Console.WriteLine("Quit to close the app");
-
+                    case "help":
+                        PrintHelp();
+                        break;
+                    case "showcontacts":
+                        ShowContacts();
+                        break;
+                    case "viewcontact":
+                        ViewContact();
+                        break;
+                    case "createcontact":
+                        CreateContact();
+                        break;
+                    case "editcontact":
+                        EditContact();
+                        break;
+                    case "deletecontact":
+                        DeleteContact();
+                        break;
+                    case "quit":
+                        return;
+                    default:
+                        Console.WriteLine("Invalid command, try typing Help");
+                        break;
                 }
-
-
-                else if (str.ToLower() != "quit")
-                {
-                    switch (str.ToLower())
-                    {
-                        case "showcontacts":
-                            this.ShowContacts();
-                            break;
-                        case "viewcontact":
-                            this.ViewContact();
-                            break;
-                        case "createcontact":
-                            this.CreateContact();
-                            break;
-                        case "editcontact":
-                            this.EditContact();
-                            break;
-                        case "deletecontact":
-                            this.DeleteContact();
-                            break;
-                        default:
-                            break;
-                    }
-
-                }
-
-                else if (str.ToLower() == "quit")
-                    Environment.Exit(0);
-
-                else
-                {
-                    Console.WriteLine("Invalid command, try typing Help");
-                }
-
             }
-
         }
 
-
-        public void ShowContacts()
+        private void ShowContacts()
         {
-            int i = 1;
-            Console.WriteLine("There are {0} contacts in your contact list", Contacts.Count(), " printing them below");
-            foreach (Contact contact in Contacts)
+            List<Contact> contacts = _dbService.GetAllContacts();
+            Console.WriteLine("There are {0} contacts in your contact list, printing them below", contacts.Count);
+            foreach (Contact contact in contacts)
             {
-                Console.WriteLine("Contact number {0}", i);
                 PrintContact(contact);
-                i++;
             }
         }
 
-        public void ViewContact()
+        private void ViewContact()
         {
-            Console.WriteLine("Please type the name of the contact or the number");
-            string name = Console.ReadLine();
+            Console.WriteLine("Please type the name or the phone number of the contact");
+            string search = Console.ReadLine();
 
-            bool b = false;
+            List<Contact> contacts = _dbService.FindContacts(search);
 
-            foreach (Contact contact in Contacts)
+            foreach (Contact contact in contacts)
             {
-                if (contact.Name.ToLower().Contains(name.ToLower()))
-                {
-                    b = true;
-                    PrintContact(contact);
-                }
-
-                if (contact.Number.Contains(name))
-                {
-                    b = true;
-                    PrintContact(contact);
-                }
-
+                PrintContact(contact);
             }
-            if (!b)
-                Console.WriteLine("There is no such contact in your contact book");
 
-
+            if (contacts.Count == 0)
+            {
+                Console.WriteLine("Contact not found!");
+            }
         }
 
-
-        public void CreateContact()
+        private void CreateContact()
         {
-            Contact contact = new Contact();
-            string str = null;
+            Contact contact = ReadContact();
 
-
-            Console.WriteLine("Please enter the name of the contact");
-            str = Console.ReadLine();
-            contact.Name = str;
-            str = null;
-
-            Console.WriteLine("Please enter the last name of the contact");
-            str = Console.ReadLine();
-            contact.LastName = str;
-            str = null;
-
-            Console.WriteLine("Please enter the number of the contact");
-            str = Console.ReadLine();
-            contact.Number = str;
-            str = null;
-
-            Console.WriteLine("Please enter the physical address of the contact");
-            str = Console.ReadLine();
-            contact.Address = str;
-            str = null;
-
-
-            Console.WriteLine("Please enter the email address of the contact");
-            str = Console.ReadLine();
-            contact.Email = str;
-            str = null;
-
-            if (!Exists(contact))
+            if (_dbService.FindContactByNumber(contact.Number) == null)
             {
-                Contacts.Add(contact);
-                Console.WriteLine("The contact was succesfully created");
+                _dbService.CreateContact(contact);
+                Console.WriteLine("The contact was successfully created");
             }
-
             else
-                Console.WriteLine("You already have an existing contact with such parameters");
-
-            
-
+            {
+                Console.WriteLine("You already have an existing contact with the given phone number");
+            }
         }
 
-        public void EditContact()
+        private void EditContact()
         {
-
-            string str = null;
-            Console.WriteLine("Please enter the number of the contact you want to edit");
-            str = Console.ReadLine();
-            
-            Contact contact = Contacts.Find(x => x.Number == str );
-
-            Console.WriteLine("Please enter the name of the contact");
-            str = Console.ReadLine();
-            contact.Name = str;
-            str = null;
-
-            Console.WriteLine("Please enter the last name of the contact");
-            str = Console.ReadLine();
-            contact.LastName = str;
-            str = null;
-
-            Console.WriteLine("Please enter the number of the contact");
-            str = Console.ReadLine();
-            contact.Number = str;
-            str = null;
-
-            Console.WriteLine("Please enter the physical address of the contact");
-            str = Console.ReadLine();
-            contact.Address = str;
-            str = null;
-
-
-            Console.WriteLine("Please enter the email address of the contact");
-            str = Console.ReadLine();
-            contact.Email = str;
-            str = null;
-
-            Console.WriteLine("The contact was succesfully edited");
-
-
-        }
-
-        public void DeleteContact()
-        {
-
-            Console.WriteLine("Please type the name of the contact or the number");
+            Console.WriteLine("Please enter the phone number of the contact you want to edit");
             string number = Console.ReadLine();
 
-            Contact contact = Contacts.Find(x => x.Number == number);
-            if (Contacts == null)
-                Console.WriteLine("Your contact list is empty");
-            if (Exists(contact))
-                Contacts.Remove(contact);
-            else
-                Console.WriteLine("There is no such contact in your contact list");
+            Contact contact = _dbService.FindContactByNumber(number);
+
+            if (contact == null)
+            {
+                Console.WriteLine("Contact not found!");
+                return;
+            }
+
+            Contact editedContact = ReadContact();
+
+            _dbService.EditContact(contact.Id, editedContact);
+
+            Console.WriteLine("The contact was edited succesfully");
         }
 
-        private bool Exists(Contact contact)
+        private void DeleteContact()
         {
-            return Contacts.Contains(contact);
-        }
+            Console.WriteLine("Please type the phone number of the contact");
 
-        public void PrintContact(Contact contact)
-        {
+            string number = Console.ReadLine();
+
+            Contact contact = _dbService.FindContactByNumber(number);
+
             if (contact != null)
             {
-                Console.WriteLine("{0} {1}", contact.Name, contact.LastName);
-                Console.WriteLine("Number is {0}", contact.Number);
-                Console.WriteLine("Address is {0}", contact.Address);
-                Console.WriteLine("Email is {0}", contact.Email);
+                _dbService.RemoveContact(contact.Id);
+                Console.WriteLine("The contact was deleted successfully");
+            }
+            else
+            {
+                Console.WriteLine("Contact not found!");
             }
         }
 
+        private Contact ReadContact()
+        {
+            Contact contact = new Contact();
 
+            Console.WriteLine("Please enter the first name of the contact");
+            contact.FirstName = Console.ReadLine();
 
+            Console.WriteLine("Please enter the last name of the contact");
+            contact.LastName = Console.ReadLine();
+
+            Console.WriteLine("Please enter the phone number of the contact");
+            contact.Number = Console.ReadLine();
+
+            Console.WriteLine("Please enter the physical address of the contact");
+            contact.Address = Console.ReadLine();
+
+            Console.WriteLine("Please enter the email address of the contact");
+            contact.Email = Console.ReadLine();
+
+            return contact;
+        }
+
+        private void PrintContact(Contact contact)
+        {
+            Console.WriteLine("Contact ID {0}", contact.Id);
+            Console.WriteLine("{0} {1}", contact.FirstName, contact.LastName);
+            Console.WriteLine("Number is {0}", contact.Number);
+            Console.WriteLine("Address is {0}", contact.Address);
+            Console.WriteLine("Email is {0}", contact.Email);
+        }
+
+        private void PrintHelp()
+        {
+            Console.WriteLine("The available commands are:");
+            Console.WriteLine("ShowContacts to see all your contacts");
+            Console.WriteLine("CreateContact to create a new contact");
+            Console.WriteLine("EditContact to edit an existing contact");
+            Console.WriteLine("DeleteContact to delete an existing contact");
+            Console.WriteLine("Quit to close the app");
+        }
     }
 }
