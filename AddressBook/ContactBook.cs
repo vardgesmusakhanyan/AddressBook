@@ -10,9 +10,7 @@ namespace AddressBook
 {
     public class ContactBook
     {
-
         private readonly IDbService _dbService;
-
 
         public ContactBook(IDbService dbService)
         {
@@ -60,10 +58,17 @@ namespace AddressBook
         private void ShowContacts()
         {
             List<Contact> contacts = _dbService.GetAllContacts();
-            Console.WriteLine("There are {0} contacts in your contact list, printing them below", contacts.Count);
-            foreach (Contact contact in contacts)
+            if (contacts.Count != 0)
             {
-                PrintContact(contact);
+                Console.WriteLine("There are {0} contacts in your contact list, printing them below", contacts.Count);
+                foreach (Contact contact in contacts)
+                {
+                    PrintContact(contact);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Your contact book is empty");
             }
         }
 
@@ -89,7 +94,7 @@ namespace AddressBook
         {
             Contact contact = ReadContact();
 
-            if (_dbService.FindContactByNumber(contact.Number) == null)
+            if (_dbService.FindContactByNumber(contact.PhoneNumber) == null)
             {
                 _dbService.CreateContact(contact);
                 Console.WriteLine("The contact was successfully created");
@@ -143,20 +148,30 @@ namespace AddressBook
         {
             Contact contact = new Contact();
 
-            Console.WriteLine("Please enter the first name of the contact");
-            contact.FirstName = Console.ReadLine();
+            Console.WriteLine("Please enter contact information");
+            do
+            {
+                Console.Write("Full Name: ");
+                contact.FullName = Console.ReadLine();
+            }
+            while (String.IsNullOrEmpty(contact.FullName));
 
-            Console.WriteLine("Please enter the last name of the contact");
-            contact.LastName = Console.ReadLine();
+            do
+            {
+                Console.Write("Phone Number: ");
+                contact.PhoneNumber = Console.ReadLine();
+            }
+            while (String.IsNullOrEmpty(contact.PhoneNumber));
 
-            Console.WriteLine("Please enter the phone number of the contact");
-            contact.Number = Console.ReadLine();
-
-            Console.WriteLine("Please enter the physical address of the contact");
+            Console.Write("Physical address: ");
             contact.Address = Console.ReadLine();
 
-            Console.WriteLine("Please enter the email address of the contact");
-            contact.Email = Console.ReadLine();
+            do
+            {
+                Console.Write("Email address: ");
+                contact.Email = Console.ReadLine();
+            }
+            while (String.IsNullOrEmpty(contact.Email));
 
             return contact;
         }
@@ -164,8 +179,8 @@ namespace AddressBook
         private void PrintContact(Contact contact)
         {
             Console.WriteLine("Contact ID {0}", contact.Id);
-            Console.WriteLine("{0} {1}", contact.FirstName, contact.LastName);
-            Console.WriteLine("Number is {0}", contact.Number);
+            Console.WriteLine(contact.FullName);
+            Console.WriteLine("Number is {0}", contact.PhoneNumber);
             Console.WriteLine("Address is {0}", contact.Address);
             Console.WriteLine("Email is {0}", contact.Email);
         }
