@@ -83,6 +83,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers\Validator.cs" />
     <Compile Include="Interfaces\IDbService.cs" />
     <Compile Include="Models\Contact.cs" />
     <Compile Include="ContactBook.cs" />

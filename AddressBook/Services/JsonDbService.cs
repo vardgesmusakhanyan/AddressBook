@@ -13,7 +13,7 @@ namespace AddressBook.Services
     class JsonDbService : IDbService
     {
         private List<Contact> _contacts;
-        private string FileName { get => @".\Contacts.json";}
+        private const string fileName = @".\Contacts.json";
 
         public JsonDbService()
         {
@@ -23,14 +23,14 @@ namespace AddressBook.Services
         private void SaveChanges()
         {
             string json = JsonSerializer.Serialize(_contacts, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(FileName, json);
+            File.WriteAllText(fileName, json);
         }
 
         private void Load()
         {
-            if (File.Exists(FileName))
+            if (File.Exists(fileName))
             {
-                string jsonString = File.ReadAllText(FileName);
+                string jsonString = File.ReadAllText(fileName);
                 _contacts = JsonSerializer.Deserialize<List<Contact>>(jsonString);
             }
             else

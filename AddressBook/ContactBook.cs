@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AddressBook.Services;
 using AddressBook.Interfaces;
+using AddressBook.Helpers;
 
 namespace AddressBook
 {
@@ -24,6 +25,7 @@ namespace AddressBook
 
             while (true)
             {
+                Console.Write("> ");
                 cmd = Console.ReadLine();
 
                 switch (cmd.ToLower())
@@ -154,14 +156,23 @@ namespace AddressBook
                 Console.Write("Full Name: ");
                 contact.FullName = Console.ReadLine();
             }
-            while (String.IsNullOrEmpty(contact.FullName));
+            while (string.IsNullOrEmpty(contact.FullName));
 
             do
             {
                 Console.Write("Phone Number: ");
-                contact.PhoneNumber = Console.ReadLine();
+                string str = Console.ReadLine();
+                if (Validator.IsPhoneNumber(str))
+                {
+                    contact.PhoneNumber = str;
+                }
+                else
+                {
+                    Console.WriteLine("Input line is not a valid phone number, see correct format below: ");
+                    Console.WriteLine("###-###-### or ###-###-####");
+                }
             }
-            while (String.IsNullOrEmpty(contact.PhoneNumber));
+            while (string.IsNullOrEmpty(contact.PhoneNumber));
 
             Console.Write("Physical address: ");
             contact.Address = Console.ReadLine();
@@ -169,20 +180,29 @@ namespace AddressBook
             do
             {
                 Console.Write("Email address: ");
-                contact.Email = Console.ReadLine();
+                string str = Console.ReadLine();
+                if (Validator.IsEmailAddress(str))
+                {
+                    contact.Email = str;
+                }
+                else
+                {
+                    Console.WriteLine("Input line is not a valid email Address, see correct format below: ");
+                    Console.WriteLine("#####@####.###");
+                }
             }
-            while (String.IsNullOrEmpty(contact.Email));
+            while (string.IsNullOrEmpty(contact.Email));
 
             return contact;
         }
 
         private void PrintContact(Contact contact)
         {
-            Console.WriteLine("Contact ID {0}", contact.Id);
-            Console.WriteLine(contact.FullName);
-            Console.WriteLine("Number is {0}", contact.PhoneNumber);
-            Console.WriteLine("Address is {0}", contact.Address);
-            Console.WriteLine("Email is {0}", contact.Email);
+            Console.WriteLine("----------------------------------");
+            Console.WriteLine("               {0}", contact.FullName);
+            Console.WriteLine("Phone Number:      {0}", contact.PhoneNumber);
+            Console.WriteLine("Physical Address:  {0}", contact.Address);
+            Console.WriteLine("Email Address:     {0}", contact.Email);
         }
 
         private void PrintHelp()
